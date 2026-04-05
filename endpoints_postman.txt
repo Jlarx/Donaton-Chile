@@ -109,3 +109,7 @@ Levantando Portal de usuario (Puerto 5173)...
 ┬íTodos los servicios han sido lanzados en ventanas separadas!
 Espere unos segundos a que inicialicen y luego abra http://localhost:5173 en su navegador.
 Presione una tecla para continuar . . . 
+
+correr test
+
+..\mvnw.cmd clean test jacoco:report

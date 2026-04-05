@@ -29,3 +29,5 @@ jobs:
       with:
         name: jacoco-reports
         path: "**/target/site/jacoco/*"
+
+      #cada vez que nuestro equipo suban código nuevo a GitHub (git push), GitHub lee ese archivo y automáticamente en sus servidores ocultos hara: Instala Java 17. Descarga tu proyecto. Ejecuta internamente el comando que recién usaste (..\mvnw.cmd clean test jacoco:report).Revisara si hay errores tambien.
