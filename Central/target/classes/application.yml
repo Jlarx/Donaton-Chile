@@ -1,0 +1,65 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: central
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+      routes:
+        - id: donaciones-service
+          uri: lb://donaciones-service
+          predicates:
+            - Path=/api/donaciones/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: donacionesCircuitBreaker
+                fallbackUri: forward:/fallback/donaciones
+
+        - id: logistica-service
+          uri: lb://logistica-service
+          predicates:
+            - Path=/api/logistica/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: logisticaCircuitBreaker
+                fallbackUri: forward:/fallback/logistica
+
+        - id: necesidades-service
+          uri: lb://necesidades-service
+          predicates:
+            - Path=/api/necesidades/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: necesidadesCircuitBreaker
+                fallbackUri: forward:/fallback/necesidades
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+    instances:
+      donacionesCircuitBreaker:
+        baseConfig: default
+      logisticaCircuitBreaker:
+        baseConfig: default
+      necesidadesCircuitBreaker:
+        baseConfig: default

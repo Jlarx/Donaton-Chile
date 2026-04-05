@@ -1,0 +1,10 @@
+com\donaton\logistica\entity\CentroAcopio.class
+com\donaton\logistica\LogisticaApplication.class
+com\donaton\logistica\repository\CentroAcopioRepository.class
+com\donaton\logistica\exception\ResourceNotFoundException.class
+com\donaton\logistica\service\CentroAcopioService.class
+com\donaton\logistica\controller\LogisticaController.class
+com\donaton\logistica\dto\CentroAcopioDTO.class
+com\donaton\logistica\exception\GlobalExceptionHandler.class
+com\donaton\logistica\DataLoader.class
+com\donaton\logistica\filter\LoggingFilter.class

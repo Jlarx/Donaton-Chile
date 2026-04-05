@@ -1,0 +1,111 @@
+
+POSTMAN (DONATON)
+
+Nota: Todas las peticiones deben hacerse a través de 
+la CENTRAL (Gateway) que corre en el puerto 8080.
+
+1. LOGÍSTICA (Centros de Acopio)
+
+ Crear un Centro de Acopio
+URL: http://localhost:8080/api/logistica/centros
+Método: POST
+
+{
+  "nombre": "Centro Base Lima",
+  "ubicacion": "Av. Principal 123, Lima",
+  "capacidadMaxima": 500,
+  "inventarioActual": 0
+}
+
+Listar todos los Centros de Acopio
+URL: http://localhost:8080/api/logistica/centros
+Método: GET
+
+Obtener un Centro de Acopio por ID
+URL: http://localhost:8080/api/logistica/centros/1
+Método: GET
+
+2. DONACIONES
+
+Listar todas las Donaciones
+URL: http://localhost:8080/api/donaciones
+Método: GET
+
+Listar Donaciones por Centro de Acopio (Ej. ID 1)
+URL: http://localhost:8080/api/donaciones/centro/1
+Método: GET
+
+3. NECESIDADES
+
+Registrar una nueva Necesidad
+URL: http://localhost:8080/api/necesidades
+Método: POST
+
+{
+  "descripcion": "Agua potable para 50 familias",
+  "prioridad": "ALTA",
+  "estado": "PENDIENTE",
+  "centroAcopioId": 1
+}
+
+Listar todas las Necesidades
+URL: http://localhost:8080/api/necesidades
+Método: GET
+
+Listar Necesidades por Estado (Ej. PENDIENTE)
+URL: http://localhost:8080/api/necesidades/estado/PENDIENTE
+Método: GET
+
+
+
+4. PRUEBAS DE VALIDACIÓN Y ERRORES PERSONALIZADOS
+
+Intentar crear un Centro de Acopio SIN Datos (Falla la Validación)
+URL: http://localhost:8080/api/logistica/centros
+Método: POST
+
+{
+  "nombre": "",
+  "ubicacion": "",
+  "capacidadMaxima": 0
+}
+*Respuesta esperada (HTTP 400 Bad Request): Un JSON con los mensajes de validación personalizados indicando que el nombre es obligatorio y la capacidad debe ser mayor a 0.*
+
+Intentar registrar una Donación Inválida (Falla la Validación)
+URL: http://localhost:8080/api/donaciones
+Método: POST
+
+{
+  "tipo": "",
+  "recurso": "",
+  "cantidad": 0,
+  "origen": "",
+  "centroAcopioId": null
+}
+
+
+5. PRUEBA DE CIRCUIT BREAKER (FALLBACK)
+
+Para probar que el sistema de tolerancia a fallos funciona:
+1. Apaga/Detén el microservicio de "Donaciones" en VS Code.
+2. Ejecuta en Postman el GET: http://localhost:8080/api/donaciones
+3. En lugar de un error feo, el Gateway interceptará la 
+   falla y te devolverá el mensaje del Fallback:
+   "El servicio de donaciones no está disponible actualmente..."
+
+
+Para correr el programa:
+
+cd .\productos\donaton\ 
+
+.\start-all.bat
+ 
+Iniciando Proyecto Donaton (Microservicios y Frontend)...
+Levantando m├│dulo de Donaciones (Puerto 8081)...
+Levantando m├│dulo de Logistica (Puerto 8082)...
+Levantando m├│dulo Central/Gateway (Puerto 8080)...
+Levantando m├│dulo de Necesidades (Puerto 8083)...
+Levantando Portal de usuario (Puerto 5173)...
+┬íTodos los servicios han sido lanzados en ventanas separadas!
+Espere unos segundos a que inicialicen y luego abra http://localhost:5173 en su navegador.
+Presione una tecla para continuar . . . 
