@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Heart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Donaciones() {
+    const { user } = useAuth();
     const [donaciones, setDonaciones] = useState([]);
     const [centros, setCentros] = useState([]);
     const [formData, setFormData] = useState({ tipo: 'ALIMENTOS', recurso: '', cantidad: 1, origen: '', centroAcopioId: '' });
@@ -25,12 +27,18 @@ export default function Donaciones() {
            .catch(err => console.error("Error cargando centros", err));
     };
 
+    useEffect(() => {
+        if (user && user.role === 'USER') {
+            setFormData(prev => ({...prev, origen: user.email}));
+        }
+    }, [user]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setError(null);
         api.post('/donaciones', formData)
            .then(() => {
-               setFormData({ tipo: 'ALIMENTOS', recurso: '', cantidad: 1, origen: '', centroAcopioId: '' });
+               setFormData({ tipo: 'ALIMENTOS', recurso: '', cantidad: 1, origen: user?.role === 'USER' ? user.email : '', centroAcopioId: '' });
                cargarDonaciones();
            })
            .catch(err => {
@@ -38,6 +46,8 @@ export default function Donaciones() {
                setError('No se pudo registrar la donación. ' + msg);
            });
     };
+
+    const donacionesVisibles = user?.role === 'ADMIN' ? donaciones : donaciones.filter(d => d.origen === user?.email);
 
     return (
         <div>
@@ -69,7 +79,7 @@ export default function Donaciones() {
                         </div>
                         <div className="form-group">
                             <label>Origen (Donante)</label>
-                            <input value={formData.origen} onChange={e=>setFormData({...formData, origen: e.target.value})} required placeholder="Empresa S.A / Juan Pérez" />
+                            <input value={formData.origen} onChange={e=>setFormData({...formData, origen: e.target.value})} required disabled={user?.role === 'USER'} placeholder="Empresa S.A / Juan Pérez" />
                         </div>
                         <div className="form-group" style={{gridColumn: '1 / -1'}}>
                             <label>Centro de Acopio Destino</label>
@@ -88,10 +98,10 @@ export default function Donaciones() {
                 <h3>Historial de Donaciones</h3>
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Tipo</th><th>Recurso</th><th>Cantidad</th><th>Origen</th><th>ID Centro Acopio</th></tr>
+                        <tr><th>ID</th><th>Tipo</th><th>Recurso</th><th>Cantidad</th><th>Origen</th><th>ID Centro Acopio</th>{user?.role === 'ADMIN' && <th>Acciones</th>}</tr>
                     </thead>
                     <tbody>
-                        {donaciones.map(d => (
+                        {donacionesVisibles.map(d => (
                             <tr key={d.id}>
                                 <td>{d.id}</td>
                                 <td><span className="badge badge-info">{d.tipo}</span></td>
@@ -99,9 +109,23 @@ export default function Donaciones() {
                                 <td>{d.cantidad}</td>
                                 <td>{d.origen}</td>
                                 <td>{d.centroAcopioId}</td>
+                                {user?.role === 'ADMIN' && (
+                                    <td>
+                                        <button 
+                                            onClick={() => {
+                                                if(window.confirm('¿Eliminar esta donación?')) {
+                                                    api.delete(`/donaciones/${d.id}`).then(cargarDonaciones).catch(err => alert(err.response?.data?.error || 'Error al eliminar'));
+                                                }
+                                            }}
+                                            style={{background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer'}}
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
-                        {donaciones.length === 0 && <tr><td colSpan="6" style={{textAlign:'center'}}>No hay donaciones registradas</td></tr>}
+                        {donacionesVisibles.length === 0 && <tr><td colSpan={user?.role === 'ADMIN' ? 7 : 6} style={{textAlign:'center'}}>No hay donaciones registradas</td></tr>}
                     </tbody>
                 </table>
             </div>

@@ -30,4 +30,16 @@ public class DonacionController {
     public ResponseEntity<List<DonacionDTO>> obtenerPorCentro(@org.springframework.lang.NonNull @PathVariable Long centroId) {
         return ResponseEntity.ok(donacionService.obtenerPorCentro(centroId));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarDonacion(
+            @RequestHeader(value = "role", required = false) String role,
+            @PathVariable Long id) {
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(java.util.Map.of("error", "Acceso denegado: Se requiere rol ADMIN"));
+        }
+        donacionService.eliminarDonacion(id);
+        return ResponseEntity.noContent().build();
+    }
 }

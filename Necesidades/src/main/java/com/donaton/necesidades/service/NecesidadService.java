@@ -43,6 +43,14 @@ public class NecesidadService {
                 .collect(Collectors.toList());
     }
 
+    // Elimina una necesidad
+    public void eliminarNecesidad(Long id) {
+        if (!necesidadRepository.existsById(id)) {
+            throw new RuntimeException("Necesidad no encontrada con ID: " + id);
+        }
+        necesidadRepository.deleteById(id);
+    }
+
     // Método auxiliar para convertir Entidad JPA hacia DTO
     private NecesidadDTO convertToDTO(Necesidad n) {
         NecesidadDTO dto = new NecesidadDTO();

@@ -25,6 +25,7 @@
         <module>Central</module>
         <module>Necesidades</module>
         <module>EurekaServer</module>
+        <module>Usuarios</module>
     </modules>
 
     <properties>

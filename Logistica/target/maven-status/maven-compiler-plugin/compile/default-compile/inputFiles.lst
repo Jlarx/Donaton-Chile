@@ -8,3 +8,5 @@ C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com
 C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com\donaton\logistica\LogisticaApplication.java
 C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com\donaton\logistica\repository\CentroAcopioRepository.java
 C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com\donaton\logistica\service\CentroAcopioService.java
+C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com\donaton\logistica\strategy\DistribucionEquitativaStrategy.java
+C:\Users\johnl\Downloads\productos\productos\donaton\Logistica\src\main\java\com\donaton\logistica\strategy\DistribucionStrategy.java

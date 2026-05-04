@@ -17,6 +17,9 @@ start "Central" cmd /k "cd Central && ..\..\mvnw spring-boot:run"
 echo Levantando módulo de Necesidades (Puerto 8083)...
 start "Necesidades" cmd /k "cd Necesidades && ..\..\mvnw spring-boot:run"
 
+echo Levantando módulo de Usuarios (Puerto 8084)...
+start "Usuarios" cmd /k "cd Usuarios && ..\..\mvnw spring-boot:run"
+
 echo Levantando Portal de usuario (Puerto 5173)...
 start "Portal" cmd /k "cd Portal && npm run dev"
 
