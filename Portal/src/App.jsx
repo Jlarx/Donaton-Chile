@@ -1,10 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Box, Home, Heart, PackageOpen, LayoutDashboard } from 'lucide-react';
+import { Box, Home, Heart, PackageOpen, LayoutDashboard, Package } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Donaciones from './pages/Donaciones';
 import Logistica from './pages/Logistica';
 import Necesidades from './pages/Necesidades';
+import Productos from './pages/Productos';
 
 function NavLink({ to, children }) {
   const location = useLocation();
@@ -29,6 +30,7 @@ function App() {
              <NavLink to="/"><LayoutDashboard size={20} /> Dashboard</NavLink>
              <NavLink to="/donaciones"><Heart size={20} /> Donaciones</NavLink>
              <NavLink to="/necesidades"><Box size={20} /> Necesidades</NavLink>
+             <NavLink to="/productos"><Package size={20} /> Productos</NavLink>
              <NavLink to="/logistica"><PackageOpen size={20} /> Centros de Acopio</NavLink>
           </nav>
         </aside>
@@ -43,6 +45,7 @@ function App() {
                 <Route path="/donaciones" element={<Donaciones />} />
                 <Route path="/logistica" element={<Logistica />} />
                 <Route path="/necesidades" element={<Necesidades />} />
+                <Route path="/productos" element={<Productos />} />
              </Routes>
           </div>
         </main>
