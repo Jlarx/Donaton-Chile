@@ -60,6 +60,7 @@ function MainApp() {
               <Route path="/donaciones" element={<Donaciones />} />
               <Route path="/logistica" element={<Logistica />} />
               <Route path="/necesidades" element={<Necesidades />} />
+              <Route path="/productos" element={<Productos />} />
            </Routes>
         </div>
       </main>
