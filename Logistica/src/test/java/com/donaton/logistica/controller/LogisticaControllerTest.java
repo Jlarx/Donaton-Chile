@@ -26,6 +26,9 @@ public class LogisticaControllerTest {
     @MockBean
     private CentroAcopioService service;
 
+    @MockBean
+    private com.donaton.logistica.strategy.DistribucionStrategy distribucionStrategy;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -43,6 +46,7 @@ public class LogisticaControllerTest {
         when(service.crearCentro(any(CentroAcopioDTO.class))).thenReturn(output);
 
         mockMvc.perform(post("/api/logistica/centros")
+                .header("role", "ADMIN")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isCreated())
@@ -55,6 +59,7 @@ public class LogisticaControllerTest {
         CentroAcopioDTO input = new CentroAcopioDTO();
 
         mockMvc.perform(post("/api/logistica/centros")
+                .header("role", "ADMIN")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isBadRequest());
