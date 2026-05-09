@@ -3,7 +3,7 @@ package com.donaton.donaciones.service;
 import com.donaton.donaciones.client.LogisticaClient;
 import com.donaton.donaciones.dto.DonacionDTO;
 import com.donaton.donaciones.entity.Donacion;
-import com.donaton.donaciones.entity.DonacionFactory;
+import com.donaton.donaciones.factory.DonacionFactory;
 import com.donaton.donaciones.exception.ResourceNotFoundException;
 import com.donaton.donaciones.repository.DonacionRepository;
 import feign.FeignException;
@@ -73,6 +73,7 @@ public class DonacionServiceTest {
     @Test
     public void registrarDonacion_Success() {
         when(logisticaClient.obtenerCentroPorId(10L)).thenReturn(new Object());
+        doNothing().when(logisticaClient).agregarInventario(anyLong(), anyInt());
         when(factoryMock.crearDonacion(any(), any(), any(), any())).thenReturn(donacionMock);
         when(donacionRepository.save(any(Donacion.class))).thenReturn(donacionMock);
 
@@ -81,6 +82,7 @@ public class DonacionServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         verify(logisticaClient, times(1)).obtenerCentroPorId(10L);
+        verify(logisticaClient, times(1)).agregarInventario(10L, 100);
         verify(donacionRepository, times(1)).save(any(Donacion.class));
     }
 
@@ -89,8 +91,8 @@ public class DonacionServiceTest {
         FeignException.NotFound notFound = mock(FeignException.NotFound.class);
         when(logisticaClient.obtenerCentroPorId(10L)).thenThrow(notFound);
 
-        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, 
-            () -> donacionService.registrarDonacion(donacionDTO));
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> donacionService.registrarDonacion(donacionDTO));
         assertTrue(ex.getMessage().contains("no existe en logística"));
     }
 
@@ -99,8 +101,8 @@ public class DonacionServiceTest {
         FeignException feignException = mock(FeignException.class);
         when(logisticaClient.obtenerCentroPorId(10L)).thenThrow(feignException);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, 
-            () -> donacionService.registrarDonacion(donacionDTO));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> donacionService.registrarDonacion(donacionDTO));
         assertTrue(ex.getMessage().contains("Error comunicando"));
     }
 
@@ -110,8 +112,8 @@ public class DonacionServiceTest {
 
         when(logisticaClient.obtenerCentroPorId(10L)).thenReturn(new Object());
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, 
-            () -> donacionService.registrarDonacion(donacionDTO));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> donacionService.registrarDonacion(donacionDTO));
         assertTrue(ex.getMessage().contains("No existe una fábrica"));
     }
 
@@ -140,8 +142,8 @@ public class DonacionServiceTest {
     public void obtenerPorCentro_Empty_ThrowsNotFound() {
         when(donacionRepository.findByCentroAcopioId(10L)).thenReturn(Collections.emptyList());
 
-        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, 
-            () -> donacionService.obtenerPorCentro(10L));
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> donacionService.obtenerPorCentro(10L));
         assertTrue(ex.getMessage().contains("No se encontraron donaciones"));
     }
 }

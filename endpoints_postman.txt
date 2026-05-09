@@ -4,9 +4,55 @@ POSTMAN (DONATON)
 Nota: Todas las peticiones deben hacerse a través de 
 la CENTRAL (Gateway) que corre en el puerto 8080.
 
+
 1. LOGÍSTICA (Centros de Acopio)
 
- Crear un Centro de Acopio
+IMPORTANTE: Ahora que el sistema está asegurado, debes enviar el token 
+JWT en la pestaña "Headers" (o "Authorization" -> Bearer Token) en 
+todas las peticiones de Logística, Donaciones y Necesidades.
+Key: Authorization
+Value: Bearer <tu_token>
+
+0. AUTENTICACIÓN (Usuarios)
+
+Nota: Puedes usar cualquier correo electrónico que desees. El rol se define en el campo "rol".
+
+Registrar un nuevo Administrador (ADMIN)
+URL: http://localhost:8080/api/auth/registro
+Método: POST
+
+{
+  "email": "coordinador@donaton.com",
+  "password": "123",
+  "nombre": "Admin General",
+  "rol": "ADMIN"
+}
+
+Registrar un nuevo Voluntario (USER)
+URL: http://localhost:8080/api/auth/registro
+Método: POST
+
+{
+  "email": "juan@voluntario.com",
+  "password": "123",
+  "nombre": "Juan Pérez",
+  "rol": "USER"
+}
+
+Iniciar Sesión (Login - Obtener JWT)
+URL: http://localhost:8080/api/auth/login
+Método: POST
+
+{
+  "email": "coordinador@donaton.com",
+  "password": "123"
+}
+*Respuesta esperada: {"token": "eyJhbGciOiJIUzI1NiJ9..."}*
+
+
+1. LOGÍSTICA (Centros de Acopio)
+
+Crear un Centro de Acopio (Requiere Token de ADMIN)
 URL: http://localhost:8080/api/logistica/centros
 Método: POST
 
@@ -17,46 +63,50 @@ Método: POST
   "inventarioActual": 0
 }
 
-Listar todos los Centros de Acopio
+Listar todos los Centros de Acopio (Requiere Token)
 URL: http://localhost:8080/api/logistica/centros
 Método: GET
 
-Obtener un Centro de Acopio por ID
+Eliminar un Centro de Acopio (Requiere Token de ADMIN)
 URL: http://localhost:8080/api/logistica/centros/1
-Método: GET
+Método: DELETE
+
+Asignar Recursos Masivos - Strategy (Requiere Token de ADMIN)
+URL: http://localhost:8080/api/logistica/asignaciones?cantidad=100
+Método: POST
+*Respuesta esperada: Mensaje confirmando la repartición.*
 
 2. DONACIONES
 
-Listar todas las Donaciones
+Listar todas las Donaciones (Requiere Token)
 URL: http://localhost:8080/api/donaciones
 Método: GET
 
-Listar Donaciones por Centro de Acopio (Ej. ID 1)
-URL: http://localhost:8080/api/donaciones/centro/1
-Método: GET
+Eliminar una Donación (Requiere Token de ADMIN)
+URL: http://localhost:8080/api/donaciones/1
+Método: DELETE
 
 3. NECESIDADES
 
-Registrar una nueva Necesidad
+Registrar una nueva Necesidad (Requiere Token de ADMIN)
 URL: http://localhost:8080/api/necesidades
 Método: POST
 
 {
+  "titulo": "Falta Agua",
   "descripcion": "Agua potable para 50 familias",
-  "prioridad": "ALTA",
-  "estado": "PENDIENTE",
-  "centroAcopioId": 1
+  "tipoRecurso": "ALIMENTO",
+  "cantidadRequerida": 100,
+  "ubicacion": "Zona Sur"
 }
 
-Listar todas las Necesidades
+Listar todas las Necesidades (Requiere Token)
 URL: http://localhost:8080/api/necesidades
 Método: GET
 
-Listar Necesidades por Estado (Ej. PENDIENTE)
-URL: http://localhost:8080/api/necesidades/estado/PENDIENTE
-Método: GET
-
-
+Eliminar una Necesidad (Requiere Token de ADMIN)
+URL: http://localhost:8080/api/necesidades/1
+Método: DELETE
 
 4. PRUEBAS DE VALIDACIÓN Y ERRORES PERSONALIZADOS
 
@@ -105,6 +155,7 @@ Levantando m├│dulo de Donaciones (Puerto 8081)...
 Levantando m├│dulo de Logistica (Puerto 8082)...
 Levantando m├│dulo Central/Gateway (Puerto 8080)...
 Levantando m├│dulo de Necesidades (Puerto 8083)...
+Levantando m├│dulo de Usuarios (Puerto 8084)...
 Levantando Portal de usuario (Puerto 5173)...
 ┬íTodos los servicios han sido lanzados en ventanas separadas!
 Espere unos segundos a que inicialicen y luego abra http://localhost:5173 en su navegador.

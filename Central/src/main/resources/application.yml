@@ -18,11 +18,17 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
       routes:
+        - id: usuarios-service
+          uri: lb://usuarios-service
+          predicates:
+            - Path=/api/auth/**
+
         - id: donaciones-service
           uri: lb://donaciones-service
           predicates:
             - Path=/api/donaciones/**
           filters:
+            - JwtAuthenticationFilter
             - name: CircuitBreaker
               args:
                 name: donacionesCircuitBreaker
@@ -33,6 +39,7 @@ spring:
           predicates:
             - Path=/api/logistica/**
           filters:
+            - JwtAuthenticationFilter
             - name: CircuitBreaker
               args:
                 name: logisticaCircuitBreaker
@@ -43,6 +50,7 @@ spring:
           predicates:
             - Path=/api/necesidades/**
           filters:
+            - JwtAuthenticationFilter
             - name: CircuitBreaker
               args:
                 name: necesidadesCircuitBreaker
@@ -52,10 +60,10 @@ resilience4j:
   circuitbreaker:
     configs:
       default:
-        slidingWindowSize: 10
-        permittedNumberOfCallsInHalfOpenState: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
+        slidingWindowSize: 10 # ultimas 10 peticiones que entraron
+        permittedNumberOfCallsInHalfOpenState: 3 #cuantas peticiones se permiten en estado medio abierto
+        failureRateThreshold: 50 #si falla el 50% de las peticiones el servidor deja de funcionar para que no caigan otros servidores y da el error 
+        waitDurationInOpenState: 10000 #tiempo en estado abierto
     instances:
       donacionesCircuitBreaker:
         baseConfig: default

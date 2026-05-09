@@ -35,4 +35,17 @@ public class NecesidadController {
     public ResponseEntity<List<NecesidadDTO>> obtenerPorEstado(@PathVariable String estado) {
         return ResponseEntity.ok(necesidadService.obtenerPorEstado(estado));
     }
+
+    // DELETE /api/necesidades/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarNecesidad(
+            @RequestHeader(value = "role", required = false) String role,
+            @PathVariable Long id) {
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(java.util.Map.of("error", "Acceso denegado: Se requiere rol ADMIN"));
+        }
+        necesidadService.eliminarNecesidad(id);
+        return ResponseEntity.noContent().build();
+    }
 }

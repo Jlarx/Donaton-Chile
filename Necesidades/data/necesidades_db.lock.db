@@ -1,6 +1,6 @@
 #FileLock
-#Sun Apr 05 12:44:14 CLT 2026
-server=192.168.1.52\:53800
+#Sun Apr 26 22:50:48 CLT 2026
+server=192.168.1.51\:58178
 hostName=DESKTOP-N2OO3MR
 method=file
-id=19d5e87cb719ae6e35125d96f9aa5a7a1f0b46b3144
+id=19dccd8adfb037bd89f07c024d3c4fda8840510016e

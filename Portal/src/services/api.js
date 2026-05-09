@@ -46,9 +46,9 @@ api.interceptors.response.use(
 
 // Podemos usar interceptores aquí en el futuro para enviar un Bearer Token
 api.interceptors.request.use(config => {
-    // Ejemplo de futuro uso de JWT:
-    // const token = localStorage.getItem('token');
-    // if(token) config.headers.Authorization = `Bearer ${token}`;
+    // Uso de JWT:
+    const token = localStorage.getItem('token');
+    if(token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
 

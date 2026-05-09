@@ -1,7 +1,7 @@
 package com.donaton.donaciones.service;
 
 import com.donaton.donaciones.entity.Donacion;
-import com.donaton.donaciones.entity.DonacionFactory;
+import com.donaton.donaciones.factory.DonacionFactory;
 import com.donaton.donaciones.repository.DonacionRepository;
 import com.donaton.donaciones.dto.DonacionDTO;
 import com.donaton.donaciones.exception.ResourceNotFoundException;
@@ -49,6 +49,15 @@ public class DonacionService {
             dto.getCentroAcopioId()
         );
         Donacion guardada = donacionRepository.save(nuevaDonacion);
+        
+        // Sincronizar el inventario en el microservicio de Logística
+        try {
+            logisticaClient.agregarInventario(dto.getCentroAcopioId(), dto.getCantidad());
+        } catch (Exception e) {
+            // Logear error de sincronización de inventario, pero no fallar la donación
+            System.err.println("Advertencia: No se pudo actualizar el inventario en Logística para el centro " + dto.getCentroAcopioId());
+        }
+        
         return convertToDTO(guardada);
     }
 
@@ -56,6 +65,13 @@ public class DonacionService {
         return donacionRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .toList();
+    }
+
+    public void eliminarDonacion(Long id) {
+        if (!donacionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Donación no encontrada con ID: " + id);
+        }
+        donacionRepository.deleteById(id);
     }
 
     public List<DonacionDTO> obtenerPorCentro(@org.springframework.lang.NonNull Long centroId) {

@@ -38,6 +38,25 @@ public class CentroAcopioService {
         return convertToDTO(entidad);
     }
 
+    public void eliminarCentro(@NonNull Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Centro de Acopio no encontrado con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
+    public void agregarInventario(@NonNull Long id, Integer cantidad) {
+        if (cantidad == null || cantidad <= 0) return;
+        CentroAcopio entidad = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Centro de Acopio no encontrado con ID: " + id));
+        
+        Integer actual = entidad.getInventarioActual();
+        if (actual == null) actual = 0;
+        
+        entidad.setInventarioActual(actual + cantidad);
+        repository.save(entidad);
+    }
+
     private CentroAcopioDTO convertToDTO(CentroAcopio entidad) {
         CentroAcopioDTO dto = new CentroAcopioDTO();
         dto.setId(entidad.getId());

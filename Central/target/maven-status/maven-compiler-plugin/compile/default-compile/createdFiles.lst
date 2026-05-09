@@ -1,4 +1,4 @@
-com\donaton\central\CentralApplication.class
 com\donaton\central\controller\BffController.class
 com\donaton\central\controller\FallbackController.class
+com\donaton\central\CentralApplication.class
 com\donaton\central\WebClientConfig.class
