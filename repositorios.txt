@@ -1,0 +1,31 @@
+Repositorio principal:
+https://github.com/Jlarx/Donaton-Chile.git
+
+Descripción:
+Repositorio que contiene la solución completa del proyecto Donaton Chile, incluyendo frontend, componente NPM, Backend For Frontend, microservicios, EurekaServer, documentación y configuración de integración continua.
+
+Componentes incluidos:
+
+1. Portal
+Frontend principal desarrollado con React y Vite.
+
+2. ui-donaton
+Componente frontend reutilizable de tipo NPM ubicado dentro de Portal/packages/ui-donaton.
+
+3. Central
+Componente Backend For Frontend y API Gateway encargado de recibir solicitudes del frontend, validar JWT y redirigir peticiones a los microservicios.
+
+4. Donaciones
+Microservicio encargado de gestionar donaciones.
+
+5. Necesidades
+Microservicio encargado de gestionar necesidades detectadas en terreno.
+
+6. Logistica
+Microservicio encargado de gestionar centros de acopio y distribución.
+
+7. Usuarios
+Microservicio encargado del registro, login y generación de tokens JWT.
+
+8. EurekaServer
+Servidor de descubrimiento utilizado para registrar y localizar microservicios.

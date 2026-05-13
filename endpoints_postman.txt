@@ -146,7 +146,7 @@ Para probar que el sistema de tolerancia a fallos funciona:
 
 Para correr el programa:
 
-cd .\productos\donaton\ 
+cd .\productos\ 
 
 .\start-all.bat
  
