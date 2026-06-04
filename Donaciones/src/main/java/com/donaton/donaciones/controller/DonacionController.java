@@ -31,6 +31,14 @@ public class DonacionController {
         return ResponseEntity.ok(donacionService.obtenerPorCentro(centroId));
     }
 
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<DonacionDTO> actualizarEstado(
+            @PathVariable Long id,
+            @RequestParam("estado") String estado) {
+        DonacionDTO actualizada = donacionService.actualizarEstado(id, estado);
+        return ResponseEntity.ok(actualizada);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarDonacion(
             @RequestHeader(value = "role", required = false) String role,

@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -51,17 +52,22 @@ public class BffControllerTest {
         when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         
-        // Mocking responses
+        // Mocking responses for the three microservices (Logistica, Donaciones, Necesidades)
         when(responseSpec.bodyToMono(Object.class))
-            .thenReturn(Mono.just(List.of("Centro 1")))
-            .thenReturn(Mono.just(List.of("Donacion 1")));
+            .thenReturn(Mono.just(List.of(Map.of("id", 1L, "nombre", "Centro 1", "inventarioActual", 10, "capacidadMaxima", 100))))
+            .thenReturn(Mono.just(List.of(Map.of("id", 1L, "cantidad", 50, "estado", "REGISTRADA"))))
+            .thenReturn(Mono.just(List.of(Map.of("id", 1L, "estado", "PENDIENTE"))));
 
         webTestClient.get()
                 .uri("/bff/dashboard-overview")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.centrosDisponibles[0]").isEqualTo("Centro 1")
-                .jsonPath("$.donacionesTotales").exists();
+                .jsonPath("$.centrosDisponibles[0].nombre").isEqualTo("Centro 1")
+                .jsonPath("$.donacionesTotales").exists()
+                .jsonPath("$.necesidadesTotales").exists()
+                .jsonPath("$.resumen.totalCentros").isEqualTo(1)
+                .jsonPath("$.resumen.totalDonaciones").isEqualTo(1)
+                .jsonPath("$.resumen.totalNecesidades").isEqualTo(1);
     }
 }

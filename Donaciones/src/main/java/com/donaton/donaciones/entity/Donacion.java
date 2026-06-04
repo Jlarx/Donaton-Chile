@@ -31,8 +31,13 @@ public class Donacion {
 
     private Long centroAcopioId;
 
+    private String estado = "REGISTRADA";
+
     @PrePersist
     public void prePersist() {
         this.fechaRegistro = LocalDateTime.now();
+        if (this.estado == null) {
+            this.estado = "REGISTRADA";
+        }
     }
 }

@@ -24,4 +24,6 @@ public class DonacionDTO {
 
     @NotNull(message = "El ID del Centro de Acopio destino es obligatorio")
     private Long centroAcopioId;
+
+    private String estado;
 }

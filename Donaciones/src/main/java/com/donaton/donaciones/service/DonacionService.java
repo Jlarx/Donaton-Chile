@@ -82,6 +82,21 @@ public class DonacionService {
         return donaciones.stream().map(this::convertToDTO).toList();
     }
 
+    public DonacionDTO actualizarEstado(Long id, String nuevoEstado) {
+        Donacion donacion = donacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Donación no encontrada con ID: " + id));
+        
+        String estadoUpper = nuevoEstado.toUpperCase();
+        java.util.List<String> estadosValidos = java.util.List.of("REGISTRADA", "ASIGNADA", "EN_TRASLADO", "RECIBIDA", "DISTRIBUIDA", "CANCELADA");
+        if (!estadosValidos.contains(estadoUpper)) {
+            throw new IllegalArgumentException("Estado no válido: " + nuevoEstado + ". Estados permitidos: " + estadosValidos);
+        }
+        
+        donacion.setEstado(estadoUpper);
+        Donacion guardada = donacionRepository.save(donacion);
+        return convertToDTO(guardada);
+    }
+
     private DonacionDTO convertToDTO(Donacion donacion) {
         DonacionDTO dto = new DonacionDTO();
         dto.setId(donacion.getId());
@@ -90,6 +105,7 @@ public class DonacionService {
         dto.setCantidad(donacion.getCantidad());
         dto.setOrigen(donacion.getOrigen());
         dto.setCentroAcopioId(donacion.getCentroAcopioId());
+        dto.setEstado(donacion.getEstado());
         return dto;
     }
 }

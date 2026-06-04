@@ -27,6 +27,29 @@ export default function Donaciones() {
            .catch(err => console.error("Error cargando centros", err));
     };
 
+    const getBadgeClassForEstado = (estado) => {
+        switch (estado) {
+            case 'RECIBIDA':
+            case 'DISTRIBUIDA':
+                return 'badge-success';
+            case 'REGISTRADA':
+                return 'badge-info';
+            case 'ASIGNADA':
+            case 'EN_TRASLADO':
+                return 'badge-warning';
+            case 'CANCELADA':
+                return 'badge-error';
+            default:
+                return 'badge-info';
+        }
+    };
+
+    const cambiarEstado = (id, nuevoEstado) => {
+        api.put(`/donaciones/${id}/estado?estado=${nuevoEstado}`)
+           .then(cargarDonaciones)
+           .catch(err => alert('No se pudo cambiar el estado: ' + (err.response?.data?.message || err.message)));
+    };
+
     useEffect(() => {
         if (user && user.role === 'USER') {
             setFormData(prev => ({...prev, origen: user.email}));
@@ -98,7 +121,7 @@ export default function Donaciones() {
                 <h3>Historial de Donaciones</h3>
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Tipo</th><th>Recurso</th><th>Cantidad</th><th>Origen</th><th>ID Centro Acopio</th>{user?.role === 'ADMIN' && <th>Acciones</th>}</tr>
+                        <tr><th>ID</th><th>Tipo</th><th>Recurso</th><th>Cantidad</th><th>Origen</th><th>ID Centro Acopio</th><th>Estado</th>{user?.role === 'ADMIN' && <th>Acciones</th>}</tr>
                     </thead>
                     <tbody>
                         {donacionesVisibles.map(d => (
@@ -109,23 +132,38 @@ export default function Donaciones() {
                                 <td>{d.cantidad}</td>
                                 <td>{d.origen}</td>
                                 <td>{d.centroAcopioId}</td>
+                                <td><span className={`badge ${getBadgeClassForEstado(d.estado)}`}>{d.estado || 'REGISTRADA'}</span></td>
                                 {user?.role === 'ADMIN' && (
                                     <td>
-                                        <button 
-                                            onClick={() => {
-                                                if(window.confirm('¿Eliminar esta donación?')) {
-                                                    api.delete(`/donaciones/${d.id}`).then(cargarDonaciones).catch(err => alert(err.response?.data?.error || 'Error al eliminar'));
-                                                }
-                                            }}
-                                            style={{background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer'}}
-                                        >
-                                            Eliminar
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            <select 
+                                                value={d.estado || 'REGISTRADA'} 
+                                                onChange={(e) => cambiarEstado(d.id, e.target.value)}
+                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                                            >
+                                                <option value="REGISTRADA">Registrada</option>
+                                                <option value="ASIGNADA">Asignada</option>
+                                                <option value="EN_TRASLADO">En Traslado</option>
+                                                <option value="RECIBIDA">Recibida</option>
+                                                <option value="DISTRIBUIDA">Distribuida</option>
+                                                <option value="CANCELADA">Cancelada</option>
+                                            </select>
+                                            <button 
+                                                onClick={() => {
+                                                    if(window.confirm('¿Eliminar esta donación?')) {
+                                                        api.delete(`/donaciones/${d.id}`).then(cargarDonaciones).catch(err => alert(err.response?.data?.error || 'Error al eliminar'));
+                                                    }
+                                                }}
+                                                style={{background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', marginLeft: '4px'}}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
                                     </td>
                                 )}
                             </tr>
                         ))}
-                        {donacionesVisibles.length === 0 && <tr><td colSpan={user?.role === 'ADMIN' ? 7 : 6} style={{textAlign:'center'}}>No hay donaciones registradas</td></tr>}
+                        {donacionesVisibles.length === 0 && <tr><td colSpan={user?.role === 'ADMIN' ? 8 : 7} style={{textAlign:'center'}}>No hay donaciones registradas</td></tr>}
                     </tbody>
                 </table>
             </div>
