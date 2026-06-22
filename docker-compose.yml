@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build:
+      context: .
+      args:
+        MODULE: EurekaServer
+    ports:
+      - "8761:8761"
+    networks:
+      - donaton-network
+
+  central-gateway:
+    build:
+      context: .
+      args:
+        MODULE: Central
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - donaton-network
+
+  usuarios-service:
+    build:
+      context: .
+      args:
+        MODULE: Usuarios
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - donaton-network
+
+  donaciones-service:
+    build:
+      context: .
+      args:
+        MODULE: Donaciones
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - donaton-network
+
+  logistica-service:
+    build:
+      context: .
+      args:
+        MODULE: Logistica
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - donaton-network
+
+  necesidades-service:
+    build:
+      context: .
+      args:
+        MODULE: Necesidades
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - donaton-network
+
+  portal:
+    build:
+      context: ./Portal
+    ports:
+      - "5173:80"
+    networks:
+      - donaton-network
+    depends_on:
+      - central-gateway
+
+networks:
+  donaton-network:
+    driver: bridge
