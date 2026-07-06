@@ -34,7 +34,7 @@ Este documento describe detalladamente los patrones de diseño arquitectónico y
 ## 4. Patrón Repository (Repositorio)
 *   **Ubicación:** Todos los microservicios (`DonacionRepository.java`, `CentroAcopioRepository.java`, etc.)
 *   **Justificación:** Aísla el dominio de negocio (entidades JPA) de los detalles de infraestructura de persistencia (SQL/JDBC).
-*   **Implementación:** Al extender `JpaRepository<T, ID>`, Spring Data genera en tiempo de ejecución las implementaciones necesarias para la base de datos H2, abstrayendo las consultas básicas de creación, eliminación y búsquedas personalizadas (como `findByEstado` o `findByCentroAcopioId`).
+*   **Implementación:** Al extender `JpaRepository<T, ID>`, Spring Data genera en tiempo de ejecución las implementaciones necesarias para la base de datos PostgreSQL, abstrayendo las consultas básicas de creación, eliminación y búsquedas personalizadas (como `findByEstado` o `findByCentroAcopioId`).
 
 ---
 

@@ -7,7 +7,7 @@ Este documento provee las instrucciones necesarias para compilar, testear y arra
 ## 1. Requisitos Previos
 Asegúrese de contar con las siguientes herramientas instaladas en su sistema:
 *   **Java Development Kit (JDK):** Versión 17 o superior.
-*   **Node.js:** Versión 18 o superior (con gestor de paquetes `npm`).
+*   **Node.js:** Versión 20 o superior (con gestor de paquetes `npm`).
 *   **Maven:** (Opcional, ya que se incluye el wrapper `mvnw.cmd` en la raíz).
 
 ---

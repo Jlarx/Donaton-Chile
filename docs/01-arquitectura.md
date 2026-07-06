@@ -24,10 +24,10 @@ La estructura consta de:
 | :--- | :---: | :--- | :--- |
 | **Eureka Server** | `8761` | Eureka Server dashboard | N/A |
 | **Central (BFF/Gateway)** | `8080` | `central` | N/A |
-| **Usuarios** | `8084` | `usuarios-service` | H2 Base de datos en archivo (`usuarios_db`) |
-| **Donaciones** | `8081` | `donaciones-service` | H2 Base de datos en archivo (`donaciones_db`) |
-| **Logística** | `8082` | `logistica-service` | H2 Base de datos en archivo (`logistica_db`) |
-| **Necesidades** | `8083` | `necesidades-service` | H2 Base de datos en archivo (`necesidades_db`) |
+| **Usuarios** | `8084` | `usuarios-service` | PostgreSQL (`usuarios_db`) |
+| **Donaciones** | `8081` | `donaciones-service` | PostgreSQL (`donaciones_db`) |
+| **Logística** | `8082` | `logistica-service` | PostgreSQL (`logistica_db`) |
+| **Necesidades** | `8083` | `necesidades-service` | PostgreSQL (`necesidades_db`) |
 | **Portal (Frontend)** | `5173` | Cliente Web React | N/A |
 
 ---

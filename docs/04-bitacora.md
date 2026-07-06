@@ -27,7 +27,7 @@ Este documento recopila las fases de desarrollo del proyecto **Donaton**, detall
 
 ## Semana 3: Microservicio Necesidades y Maquetación Frontend
 *   **Hitos logrados:**
-    *   Creación del microservicio **Necesidades** (8083) y su persistencia H2 independiente.
+    *   Creación del microservicio **Necesidades** (8083) y su persistencia PostgreSQL independiente.
     *   Desarrollo de las vistas principales en React utilizando componentes de UI interactiva (`Donaciones.jsx`, `Logistica.jsx` y `Necesidades.jsx`).
     *   Implementación del patrón de componentes *Container/Presentational* para desacoplar la lógica de API de la renderización visual en `Necesidades.jsx` y `NecesidadesView.jsx`.
 *   **Desafío técnico:** El paso del token de autenticación a través de Axios requería repetirse en cada petición.

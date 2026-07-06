@@ -12,6 +12,6 @@ BEGIN
     GET DIAGNOSTICS filas_afectadas = ROW_COUNT;
     RETURN filas_afectadas;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql^
 
 -- Uso: SELECT sp_resetear_inventario(1);

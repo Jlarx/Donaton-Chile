@@ -71,3 +71,10 @@ resilience4j:
         baseConfig: default
       necesidadesCircuitBreaker:
         baseConfig: default
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    preferIpAddress: true

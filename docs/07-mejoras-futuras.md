@@ -21,7 +21,7 @@ Este documento recopila las tareas técnicas y de producto que han sido posterga
 ---
 
 ## 3. Control de Migraciones de Base de Datos
-*   **Estado actual:** H2 utiliza `spring.jpa.hibernate.ddl-auto=update` para crear tablas automáticamente. Esto no es seguro ni rastreable en producción.
+*   **Estado actual:** PostgreSQL utiliza `spring.jpa.hibernate.ddl-auto=update` para crear tablas automáticamente. Esto no es seguro ni rastreable en producción.
 *   **Mejora propuesta:** Integrar **Flyway** o **Liquibase** en cada microservicio para manejar scripts SQL de migración versionados, permitiendo rollbacks controlados del esquema.
 
 ---
