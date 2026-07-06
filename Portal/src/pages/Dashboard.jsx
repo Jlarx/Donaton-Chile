@@ -1,234 +1,245 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, PackageOpen, Box, Activity, AlertCircle } from 'lucide-react';
+import { Heart, PackageOpen, Box, Activity, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import api from '../services/api';
 
 /**
- * Vista del Dashboard para el Frontend.
- * Consume el endpoint de orquestación del BFF (/bff/dashboard-overview) para
- * pintar un resumen del estado del sistema en un solo llamado.
- * 
- * Contiene comentarios en español tipo estudiante universitario para la entrega.
+ * Vista del Dashboard.
+ * Consume el BFF (/bff/dashboard-overview) para un resumen en un solo llamado.
+ * Implementa polling cada 15s para actualización dinámica.
  */
 export default function Dashboard() {
-    // Estados principales para la información de la API, carga y posibles errores de conexión
-    const [data, setData] = useState(null);
+    const [data, setData]       = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError]     = useState(null);
+    const [lastUpdate, setLastUpdate] = useState(null);
 
-    // Al montar el componente cargamos los datos del BFF
     useEffect(() => {
         cargarResumen();
-        // Polling de 15 segundos para que se vea dinámico en la defensa del proyecto
         const interval = setInterval(cargarResumen, 15000);
         return () => clearInterval(interval);
     }, []);
 
     const cargarResumen = () => {
-        // Llamamos al endpoint del BFF mediante Axios.
-        // Dado que usamos 'http://localhost:8080/bff/dashboard-overview', Axios ignora el baseURL '/api'
-        // pero mantiene el interceptor para agregar el Bearer Token en los headers si existe.
         api.get('http://localhost:8080/bff/dashboard-overview')
            .then(res => {
                setData(res.data);
                setError(null);
                setLoading(false);
+               setLastUpdate(new Date());
            })
            .catch(err => {
-               console.error("Error cargando el dashboard desde el BFF:", err);
-               setError(err.response?.data?.message || err.message || "Error al conectar con el Gateway.");
+               setError(err.response?.data?.message || err.message || 'Error al conectar con el Gateway.');
                setLoading(false);
            });
     };
 
-    // Estado de carga inicial con spinner css personalizado
+    // ── Estado de carga ──────────────────────────────────────────────
     if (loading && !data) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column' }}>
-                <div className="spinner" style={{ border: '4px solid #f3f3f3', borderTop: '4px solid #4f46e5', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }}></div>
-                <p style={{ marginTop: '16px', color: '#64748b' }}>Conectando al BFF Central...</p>
-                <style>{`
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                `}</style>
+            <div className="loading-wrapper fade-in">
+                <div className="spinner" />
+                <p className="loading-text">Conectando con el BFF Central...</p>
             </div>
         );
     }
 
-    // Tarjeta de alerta si falla el Gateway o no hay conexión de red
+    // ── Estado de error ──────────────────────────────────────────────
     if (error && !data) {
         return (
-            <div className="card" style={{ borderLeft: '4px solid #ef4444' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#b91c1c' }}>
-                    <AlertCircle size={24} />
-                    <h3>Error de comunicación con el Backend</h3>
+            <div className="card fade-in" style={{ borderLeft: '3px solid #f87171', maxWidth: '600px' }}>
+                <div className="flex items-center gap-3 mb-4" style={{ color: '#f87171' }}>
+                    <AlertCircle size={22} />
+                    <h3 style={{ color: '#f87171' }}>Error de conexión con el Backend</h3>
                 </div>
-                <p style={{ marginTop: '12px', color: '#475569' }}>
-                    No pudimos cargar la vista unificada. Asegúrese de que el <strong>EurekaServer</strong>, la <strong>Central</strong> y los microservicios estén levantados.
+                <p className="text-sm text-muted" style={{ lineHeight: '1.6', marginBottom: '12px' }}>
+                    No pudimos cargar la vista unificada. Asegúrese de que el <strong>EurekaServer</strong>,
+                    la <strong>Central (Gateway)</strong> y los microservicios estén levantados.
                 </p>
-                <div style={{ marginTop: '12px', fontSize: '0.85rem', color: '#ef4444' }}>Detalle: {error}</div>
-                <button className="btn" onClick={() => { setLoading(true); cargarResumen(); }} style={{ marginTop: '16px' }}>Reintentar Conexión</button>
+                <div style={{ fontSize: '0.8rem', color: '#f87171', fontFamily: 'monospace',
+                              background: 'rgba(239,68,68,0.07)', padding: '8px 12px',
+                              borderRadius: 'var(--radius-sm)', marginBottom: '16px' }}>
+                    {error}
+                </div>
+                <button className="btn btn-sm" onClick={() => { setLoading(true); cargarResumen(); }}>
+                    <RefreshCw size={14} /> Reintentar
+                </button>
             </div>
         );
     }
 
-    // Si fallan los microservicios, el BFF retorna listas vacías, así que prevenimos nulos
+    // ── Datos del BFF ────────────────────────────────────────────────
     const resumen = data?.resumen || {
-        totalCentros: 0,
-        totalInventario: 0,
-        totalCapacidad: 0,
-        totalDonaciones: 0,
-        totalItemsDonados: 0,
-        donacionesRegistradas: 0,
-        donacionesRecibidas: 0,
-        totalNecesidades: 0,
-        necesidadesPendientes: 0
+        totalCentros: 0, totalInventario: 0, totalCapacidad: 0,
+        totalDonaciones: 0, totalItemsDonados: 0,
+        donacionesRegistradas: 0, donacionesRecibidas: 0,
+        totalNecesidades: 0, necesidadesPendientes: 0
     };
 
     const estadoServicios = data?.estadoServicios || {
-        logistica: 'DOWN',
-        donaciones: 'DOWN',
-        necesidades: 'DOWN'
+        logistica: 'DOWN', donaciones: 'DOWN', necesidades: 'DOWN'
     };
 
-    // Calculamos el % de carga de los centros (inventario actual vs capacidad máxima)
-    const porcentajeCarga = resumen.totalCapacidad > 0 
-        ? Math.round((resumen.totalInventario / resumen.totalCapacidad) * 100) 
+    const porcentajeCarga = resumen.totalCapacidad > 0
+        ? Math.round((resumen.totalInventario / resumen.totalCapacidad) * 100)
         : 0;
 
+    const servicios = [
+        { nombre: 'Logística',   puerto: '8082', eureka: 'logistica-service',   estado: estadoServicios.logistica },
+        { nombre: 'Donaciones',  puerto: '8081', eureka: 'donaciones-service',  estado: estadoServicios.donaciones },
+        { nombre: 'Necesidades', puerto: '8083', eureka: 'necesidades-service', estado: estadoServicios.necesidades },
+    ];
+
+    const allUp = servicios.every(s => s.estado === 'UP');
+
     return (
-        <div>
-            {/* Header del Dashboard */}
+        <div className="fade-in">
+
+            {/* ── Page Header ─────────────────────────────────── */}
             <div className="page-header">
-                <h2 className="page-title">Bienvenido al Centro de Control de Donaciones</h2>
-                <span className="badge badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}>
-                    <Activity size={14} /> Sistema en Línea
-                </span>
-            </div>
-
-            {/* Grid de Tarjetas de Indicadores (KPIs) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-                
-                {/* Indicador 1: Donaciones totales */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', right: '-15px', top: '-15px', opacity: 0.08, color: '#ef4444' }}>
-                        <Heart size={90} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
-                        <Heart size={20} />
-                        <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Trazabilidad de Donaciones</span>
-                    </div>
-                    <h3 style={{ fontSize: '2.25rem', fontWeight: '700', color: '#0f172a', margin: '4px 0' }}>{resumen.totalDonaciones}</h3>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                        Unidades totales aportadas: <strong>{resumen.totalItemsDonados}</strong>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                        <span className="badge badge-info">{resumen.donacionesRegistradas} Registradas</span>
-                        <span className="badge badge-success">{resumen.donacionesRecibidas} Recibidas</span>
-                    </div>
-                </div>
-
-                {/* Indicador 2: Capacidad Logística */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', right: '-15px', top: '-15px', opacity: 0.08, color: '#3b82f6' }}>
-                        <PackageOpen size={90} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6' }}>
-                        <PackageOpen size={20} />
-                        <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Centros de Acopio Activos</span>
-                    </div>
-                    <h3 style={{ fontSize: '2.25rem', fontWeight: '700', color: '#0f172a', margin: '4px 0' }}>{resumen.totalCentros}</h3>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                        Carga global: <strong>{resumen.totalInventario}</strong> / {resumen.totalCapacidad} unidades
-                    </div>
-                    {/* Barra de progreso de capacidad global del sistema */}
-                    <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', marginTop: '8px', overflow: 'hidden' }}>
-                        <div style={{ width: `${porcentajeCarga}%`, height: '100%', backgroundColor: '#3b82f6', borderRadius: '4px', transition: 'width 0.6s ease' }}></div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b' }}>
-                        <span>Porcentaje de Ocupación</span>
-                        <strong>{porcentajeCarga}%</strong>
-                    </div>
-                </div>
-
-                {/* Indicador 3: Necesidades críticas */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', right: '-15px', top: '-15px', opacity: 0.08, color: '#eab308' }}>
-                        <Box size={90} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#eab308' }}>
-                        <Box size={20} />
-                        <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Necesidades en Terreno</span>
-                    </div>
-                    <h3 style={{ fontSize: '2.25rem', fontWeight: '700', color: '#0f172a', margin: '4px 0' }}>{resumen.totalNecesidades}</h3>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                        Reportes de emergencia registrados: <strong>{resumen.totalNecesidades}</strong>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                        <span className="badge badge-warning">{resumen.necesidadesPendientes} Pendientes</span>
-                        <span className="badge badge-success">{resumen.totalNecesidades - resumen.necesidadesPendientes} Cubiertas</span>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* Fila de Detalle Tecnológico y Estado de Salud del Sistema */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-                
-                {/* Sección Estado de Microservicios */}
-                <div className="card" style={{ borderLeft: '4px solid #4f46e5' }}>
-                    <h3 style={{ marginBottom: '12px', fontSize: '1.15rem' }}>Monitoreo de Infraestructura</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '20px' }}>
-                        El backend BFF unifica las respuestas. Si un servicio se cae, el <strong>Circuit Breaker</strong> en el Gateway evita la denegación total del sistema.
+                <div className="page-header-left">
+                    <h2 className="page-title">Centro de Control de Donaciones</h2>
+                    <p className="page-subtitle">
+                        Vista unificada del sistema · Actualización automática cada 15s
                     </p>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-                            <div>
-                                <strong style={{ fontSize: '0.875rem', color: '#1e293b' }}>Servicio de Logística</strong>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Puerto: 8082 | Eureka: logistica-service</div>
-                            </div>
-                            <span className={`badge ${estadoServicios.logistica === 'UP' ? 'badge-success' : 'badge-error'}`} style={{ minWidth: '85px', textAlign: 'center' }}>
-                                {estadoServicios.logistica === 'UP' ? 'ACTIVO (UP)' : 'CAÍDO (DOWN)'}
-                            </span>
-                        </div>
+                </div>
+                <div className="flex items-center gap-3" style={{ flexShrink: 0 }}>
+                    {lastUpdate && (
+                        <span className="text-xs text-muted">
+                            Última actualización: {lastUpdate.toLocaleTimeString()}
+                        </span>
+                    )}
+                    <span className={`badge ${allUp ? 'badge-success' : 'badge-warning'}`}>
+                        <Activity size={12} />
+                        {allUp ? 'Todos los sistemas activos' : 'Degradado'}
+                    </span>
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => { setLoading(true); cargarResumen(); }}
+                        title="Actualizar datos"
+                    >
+                        <RefreshCw size={14} />
+                    </button>
+                </div>
+            </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-                            <div>
-                                <strong style={{ fontSize: '0.875rem', color: '#1e293b' }}>Servicio de Donaciones</strong>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Puerto: 8081 | Eureka: donaciones-service</div>
-                            </div>
-                            <span className={`badge ${estadoServicios.donaciones === 'UP' ? 'badge-success' : 'badge-error'}`} style={{ minWidth: '85px', textAlign: 'center' }}>
-                                {estadoServicios.donaciones === 'UP' ? 'ACTIVO (UP)' : 'CAÍDO (DOWN)'}
-                            </span>
-                        </div>
+            {/* ── KPI Grid ─────────────────────────────────────── */}
+            <div className="kpi-grid">
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-                            <div>
-                                <strong style={{ fontSize: '0.875rem', color: '#1e293b' }}>Servicio de Necesidades</strong>
-                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Puerto: 8083 | Eureka: necesidades-service</div>
-                            </div>
-                            <span className={`badge ${estadoServicios.necesidades === 'UP' ? 'badge-success' : 'badge-error'}`} style={{ minWidth: '85px', textAlign: 'center' }}>
-                                {estadoServicios.necesidades === 'UP' ? 'ACTIVO (UP)' : 'CAÍDO (DOWN)'}
-                            </span>
-                        </div>
+                {/* KPI 1: Donaciones */}
+                <div className="card fade-in">
+                    <div className="card-accent" style={{ color: '#ec4899' }}>
+                        <Heart size={80} />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: '#f472b6' }}>
+                        <Heart size={16} />
+                        <span className="text-sm" style={{ fontWeight: 600 }}>Donaciones</span>
+                    </div>
+                    <div className="card-value">{resumen.totalDonaciones}</div>
+                    <div className="card-label">
+                        {resumen.totalItemsDonados} unidades en total
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                        <span className="badge badge-info">{resumen.donacionesRegistradas} registradas</span>
+                        <span className="badge badge-success">{resumen.donacionesRecibidas} recibidas</span>
                     </div>
                 </div>
 
-                {/* Sección Información del BFF & Resiliencia */}
-                <div className="card" style={{ borderLeft: '4px solid #059669', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                        <h3 style={{ marginBottom: '12px', fontSize: '1.15rem' }}>Bitácora del BFF (Backend For Frontend)</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: '1.5' }}>
-                            Este panel consume el endpoint <code>/bff/dashboard-overview</code> expuesto en la <strong>Central</strong>. 
-                            Este controlador realiza peticiones concurrentes reactivas mediante <code>WebClient</code> hacia los tres servicios 
-                            de negocio y consolida los indicadores de manera eficiente en un único DTO de respuesta.
-                        </p>
+                {/* KPI 2: Centros de acopio */}
+                <div className="card fade-in">
+                    <div className="card-accent" style={{ color: '#60a5fa' }}>
+                        <PackageOpen size={80} />
                     </div>
-                    <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '0.8rem', color: '#166534' }}>
-                        <strong>Tip del Grupo:</strong> Apaga temporalmente el microservicio de Donaciones (8081). Verás cómo este Dashboard sigue cargando (mostrando 0 donaciones y estado CAÍDO) sin lanzar un error 500 al usuario.
+                    <div className="flex items-center gap-2 mb-2" style={{ color: '#60a5fa' }}>
+                        <PackageOpen size={16} />
+                        <span className="text-sm" style={{ fontWeight: 600 }}>Centros de Acopio</span>
                     </div>
+                    <div className="card-value">{resumen.totalCentros}</div>
+                    <div className="card-label">
+                        {resumen.totalInventario} / {resumen.totalCapacidad} uds. utilizadas
+                    </div>
+                    {/* Progress bar */}
+                    <div className="progress-bar-track mt-3">
+                        <div
+                            className="progress-bar-fill"
+                            style={{ width: `${Math.min(porcentajeCarga, 100)}%` }}
+                        />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted mt-1">
+                        <span>Ocupación global</span>
+                        <strong style={{ color: porcentajeCarga > 80 ? '#f87171' : '#60a5fa' }}>
+                            {porcentajeCarga}%
+                        </strong>
+                    </div>
+                </div>
+
+                {/* KPI 3: Necesidades */}
+                <div className="card fade-in">
+                    <div className="card-accent" style={{ color: '#fbbf24' }}>
+                        <Box size={80} />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2" style={{ color: '#fbbf24' }}>
+                        <Box size={16} />
+                        <span className="text-sm" style={{ fontWeight: 600 }}>Necesidades en Terreno</span>
+                    </div>
+                    <div className="card-value">{resumen.totalNecesidades}</div>
+                    <div className="card-label">
+                        Reportes de emergencia registrados
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                        <span className="badge badge-warning">{resumen.necesidadesPendientes} pendientes</span>
+                        <span className="badge badge-success">
+                            {resumen.totalNecesidades - resumen.necesidadesPendientes} cubiertas
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Detail Row ──────────────────────────────────── */}
+            <div className="detail-grid">
+
+                {/* Panel: Estado de microservicios */}
+                <div className="card" style={{ borderLeft: '3px solid var(--primary)' }}>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3>Monitoreo de Infraestructura</h3>
+                        <span className={`badge ${allUp ? 'badge-success' : 'badge-error'}`}>
+                            {allUp ? <Wifi size={11} /> : <WifiOff size={11} />}
+                            {allUp ? 'Todos activos' : 'Degradado'}
+                        </span>
+                    </div>
+                    <p className="text-sm text-muted mb-4" style={{ lineHeight: '1.6' }}>
+                        El <strong>Gateway BFF</strong> unifica respuestas. Si un servicio falla,
+                        el <strong>Circuit Breaker</strong> previene la denegación total del sistema.
+                    </p>
+
+                    <div className="flex flex-col gap-2">
+                        {servicios.map(s => (
+                            <div key={s.nombre} className="service-item">
+                                <div className="flex items-center gap-3">
+                                    <div className={`status-dot ${s.estado === 'UP' ? 'up' : 'down'}`} />
+                                    <div>
+                                        <div className="service-item-name">{s.nombre}</div>
+                                        <div className="service-item-port">
+                                            Puerto: {s.puerto} · Eureka: {s.eureka}
+                                        </div>
+                                    </div>
+                                </div>
+                                <span className={`badge ${s.estado === 'UP' ? 'badge-success' : 'badge-error'}`}>
+                                    {s.estado === 'UP' ? 'ACTIVO' : 'CAÍDO'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Panel: Info del BFF */}
+                <div className="card" style={{ borderLeft: '3px solid #10b981' }}>
+                    <h3 className="mb-4">Bitácora del BFF</h3>
+                    <p className="text-sm text-muted" style={{ lineHeight: '1.65', marginBottom: '0px' }}>
+                        Este panel consume el endpoint <code>/bff/dashboard-overview</code> expuesto
+                        en la <strong>Central</strong>. El controlador realiza peticiones reactivas
+                        paralelas vía <code>WebClient</code> hacia los tres microservicios y consolida
+                        los KPIs en un único DTO.
+                    </p>
                 </div>
 
             </div>

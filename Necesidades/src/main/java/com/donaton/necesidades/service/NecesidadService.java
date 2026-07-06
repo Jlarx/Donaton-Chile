@@ -51,6 +51,22 @@ public class NecesidadService {
         necesidadRepository.deleteById(id);
     }
 
+    // Actualiza el estado de una necesidad
+    public NecesidadDTO actualizarEstado(Long id, String nuevoEstado) {
+        Necesidad necesidad = necesidadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Necesidad no encontrada con ID: " + id));
+        
+        String estadoUpper = nuevoEstado.toUpperCase();
+        java.util.List<String> estadosValidos = java.util.List.of("PENDIENTE", "CUBIERTA");
+        if (!estadosValidos.contains(estadoUpper)) {
+            throw new IllegalArgumentException("Estado no válido: " + nuevoEstado + ". Estados permitidos: " + estadosValidos);
+        }
+        
+        necesidad.setEstado(estadoUpper);
+        Necesidad guardada = necesidadRepository.save(necesidad);
+        return convertToDTO(guardada);
+    }
+
     // Método auxiliar para convertir Entidad JPA hacia DTO
     private NecesidadDTO convertToDTO(Necesidad n) {
         NecesidadDTO dto = new NecesidadDTO();

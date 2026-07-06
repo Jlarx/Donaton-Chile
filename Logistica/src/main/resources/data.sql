@@ -1,15 +1,17 @@
--- H2 no tiene Stored Procedures nativos de SQL puro, permite crear ALIAS que apuntan a métodos Java.
--- Como simulacro de la rúbrica, creamos el ALIAS que servirá como SP para resetear inventario.
+-- ============================================================
+-- Stored Procedure para resetear inventario de un Centro de Acopio
+-- Equivalente PostgreSQL del ALIAS H2 original
+-- ============================================================
 
-CREATE ALIAS IF NOT EXISTS SP_RESETEAR_INVENTARIO AS '
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-@org.h2.api.Mapper
-public static int resetearInventario(Connection conn, int idCentro) throws Exception {
-    PreparedStatement ps = conn.prepareStatement("UPDATE centros_acopio SET INVENTARIO_ACTUAL = 0 WHERE ID = ?");
-    ps.setInt(1, idCentro);
-    return ps.executeUpdate();
-}
-';
+CREATE OR REPLACE FUNCTION sp_resetear_inventario(p_id_centro BIGINT)
+RETURNS INTEGER AS $$
+DECLARE
+    filas_afectadas INTEGER;
+BEGIN
+    UPDATE centros_acopio SET inventario_actual = 0 WHERE id = p_id_centro;
+    GET DIAGNOSTICS filas_afectadas = ROW_COUNT;
+    RETURN filas_afectadas;
+END;
+$$ LANGUAGE plpgsql;
 
--- Ahora puedes llamarlo con CALL SP_RESETEAR_INVENTARIO(1);
+-- Uso: SELECT sp_resetear_inventario(1);

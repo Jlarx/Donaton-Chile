@@ -26,7 +26,7 @@ spring:
         - id: donaciones-service
           uri: lb://donaciones-service
           predicates:
-            - Path=/api/donaciones/**
+            - Path=/api/donaciones/**,/api/donaciones
           filters:
             - JwtAuthenticationFilter
             - name: CircuitBreaker
@@ -37,7 +37,7 @@ spring:
         - id: logistica-service
           uri: lb://logistica-service
           predicates:
-            - Path=/api/logistica/**
+            - Path=/api/logistica/**,/api/logistica
           filters:
             - JwtAuthenticationFilter
             - name: CircuitBreaker
@@ -48,7 +48,7 @@ spring:
         - id: necesidades-service
           uri: lb://necesidades-service
           predicates:
-            - Path=/api/necesidades/**
+            - Path=/api/necesidades/**,/api/necesidades
           filters:
             - JwtAuthenticationFilter
             - name: CircuitBreaker

@@ -2,58 +2,111 @@
 
 Donaton es una plataforma descentralizada basada en una **Arquitectura de Microservicios** diseñada para coordinar y optimizar la entrega de ayuda en situaciones de emergencia en Chile. Este proyecto fue desarrollado para la unidad 3 del curso **Desarrollo Fullstack III**.
 
-El sistema integra múltiples microservicios autónomos, un API Gateway con patrón BFF (Backend For Frontend), bases de datos embebidas (H2), resiliencia con Circuit Breakers (Resilience4j), comunicación inter-servicio síncrona mediante OpenFeign y un Portal administrativo interactivo desarrollado en React.
+El sistema integra múltiples microservicios autónomos, un API Gateway con patrón BFF (Backend For Frontend), bases de datos **PostgreSQL** (patrón Database per Service), resiliencia con Circuit Breakers (Resilience4j), comunicación inter-servicio síncrona mediante OpenFeign y un Portal administrativo interactivo desarrollado en React.
 
 ---
 
 ## 🛠️ Estructura y Puertos del Sistema
 
-| Módulo | Directorio | Puerto | Descripción |
-| :--- | :--- | :---: | :--- |
-| **Eureka Server** | `EurekaServer` | `8761` | Servidor de Registro y Descubrimiento de servicios |
-| **Central** | `Central` | `8080` | API Gateway + Orquestador BFF + Circuit Breakers |
-| **Usuarios** | `Usuarios` | `8084` | Autenticación de usuarios y generación de JWT |
-| **Donaciones** | `Donaciones` | `8081` | Registro y control de trazabilidad de aportes |
-| **Logística** | `Logistica` | `8082` | Gestión de Centros de Acopio y Asignaciones Masivas |
-| **Necesidades** | `Necesidades` | `8083` | Reporte y control de urgencias críticas en terreno |
-| **Portal** | `Portal` | `5173` | Cliente Web SPA (React / Vite) |
+| Módulo | Directorio | Puerto | Base de Datos | Descripción |
+| :--- | :--- | :---: | :---: | :--- |
+| **PostgreSQL** | — | `5432` | `donaton` | Servidor de base de datos relacional |
+| **Eureka Server** | `EurekaServer` | `8761` | — | Servidor de Registro y Descubrimiento de servicios |
+| **Central** | `Central` | `8080` | — | API Gateway + Orquestador BFF + Circuit Breakers |
+| **Usuarios** | `Usuarios` | `8084` | `usuarios_db` | Autenticación de usuarios y generación de JWT |
+| **Donaciones** | `Donaciones` | `8081` | `donaciones_db` | Registro y control de trazabilidad de aportes |
+| **Logística** | `Logistica` | `8082` | `logistica_db` | Gestión de Centros de Acopio y Asignaciones Masivas |
+| **Necesidades** | `Necesidades` | `8083` | `necesidades_db` | Reporte y control de urgencias críticas en terreno |
+| **Portal** | `Portal` | `5173` | — | Cliente Web SPA (React / Vite) |
 
 ---
 
-## 🚀 Guía de Ejecución Rápida (Local)
+## 📋 Prerequisitos
 
-### Paso 1: Compilar todos los microservicios
+- **Java 17** o superior
+- **Maven** (incluido como wrapper `mvnw`)
+- **PostgreSQL 16+** instalado localmente **o** Docker para levantarlo automáticamente
+- **Node.js 18+** (para el Portal React)
+
+---
+
+## 🗄️ Configuración de Base de Datos PostgreSQL
+
+Cada microservicio utiliza su propia base de datos PostgreSQL independiente (patrón **Database per Service**).
+
+### Opción A: PostgreSQL Local
+
+Si tienes PostgreSQL instalado localmente, crea las bases de datos necesarias:
+
+```sql
+CREATE DATABASE donaciones_db;
+CREATE DATABASE logistica_db;
+CREATE DATABASE necesidades_db;
+CREATE DATABASE usuarios_db;
+```
+
+Credenciales por defecto configuradas en `application.properties`:
+- **Host:** `localhost:5432`
+- **Usuario:** `donaton`
+- **Password:** `donaton123`
+
+> Si usas credenciales diferentes, actualiza los archivos `application.properties` de cada microservicio.
+
+### Opción B: Docker Compose
+
+Levanta PostgreSQL junto con todas las bases de datos automáticamente:
+
+```bash
+docker compose up postgres -d
+```
+
+Esto ejecuta el script `scripts/init-databases.sql` que crea las 4 bases de datos.
+
+---
+
+## Guía de Ejecución Rápida (Local)
+
+### Paso 1: Levantar PostgreSQL
+Ver sección anterior (Opción A u Opción B).
+
+### Paso 2: Compilar todos los microservicios
 Abra una terminal en la raíz del proyecto y corra el siguiente comando para compilar el código Java y las pruebas unitarias:
 ```bash
 .\mvnw.cmd clean install
 ```
 
-### Paso 2: Levantar la plataforma completa
+### Paso 3: Levantar la plataforma completa
 Puede iniciar todos los microservicios en ventanas separadas utilizando el script de automatización suministrado:
 ```bash
 .\start-all.bat
 ```
 *(Espere 15-20 segundos a que todos los servicios arranquen y se registren en Eureka Server)*
 
-### Paso 3: Acceder en el navegador
+### Paso 4: Acceder en el navegador
 Una vez que las consolas se estabilicen:
 *   **Consola Eureka:** Abra [http://localhost:8761](http://localhost:8761) para ver que todos los nombres de servicio (`donaciones-service`, `logistica-service`, `necesidades-service`, `usuarios-service`) aparezcan en estado `UP`.
 *   **Portal Donaton:** Acceda a [http://localhost:5173](http://localhost:5173) para interactuar con la plataforma.
 
+### Ejecución con Docker Compose (Todos los servicios)
+Para levantar TODO el sistema (PostgreSQL + microservicios + portal):
+```bash
+docker compose up --build
+```
+
 ---
 
-## 🔑 Cuentas de Prueba por Defecto
+## Cuentas de Prueba por Defecto
 
 *   **Administrador (ADMIN):**
-    *   **Email:** `coordinador@donaton.com`
-    *   **Password:** `123`
+    *   **Email:** `admin@donaton.cl`
+    *   **Password:** `admin123`
 *   **Voluntario / Donante (USER):**
-    *   **Email:** `juan@voluntario.com`
-    *   **Password:** `123`
+    *   **Email:** `user@donaton.cl`
+    *   **Password:** `user123`
 
 ---
 
-## 📖 Endpoints Principales del Sistema (Puertos Gateway 8080)
+## Endpoints Principales del Sistema (Puertos Gateway 8080)
 
 *   **Autenticación:**
     *   `POST /api/auth/registro` -> Registrar nuevos usuarios.
@@ -72,12 +125,22 @@ Una vez que las consolas se estabilicen:
 
 ---
 
-## 📷 Guía de Capturas Requeridas para la Entrega Académica
+## 🧪 Testing
+
+Los tests unitarios usan **Mockito** (sin base de datos). Los tests de integración usan **H2 en memoria** configurado mediante el perfil `test`, por lo que **no necesitan PostgreSQL corriendo**.
+
+```bash
+.\mvnw.cmd clean test
+```
+
+---
+
+## Guía de Capturas Requeridas para la Entrega Académica
 
 Para el informe final de la unidad 3, se sugiere tomar capturas de las siguientes pantallas y flujos:
 
 1.  **Dashboard del Eureka Server (`http://localhost:8761`):** Capturar la sección "Instances currently registered with Eureka" mostrando los 4 microservicios en verde (UP).
-2.  **Dashboard del Portal (`http://localhost:5173`):** Conectado como `coordinador@donaton.com` para mostrar las tarjetas resumen de Donaciones, Centros de Acopio, Necesidades y los estados "ACTIVO (UP)" de los servicios.
+2.  **Dashboard del Portal (`http://localhost:5173`):** Conectado como `admin@donaton.cl` para mostrar las tarjetas resumen de Donaciones, Centros de Acopio, Necesidades y los estados "ACTIVO (UP)" de los servicios.
 3.  **Registro de una Donación:** Formulario de donación completo asociándolo a un centro físico y verificar cómo el inventario global de ese centro aumenta en la tabla correspondiente de Centros de Acopio.
 4.  **Cambio de Estado de una Donación:** Una captura mostrando el dropdown en la fila de Donaciones con el cambio a `EN_TRASLADO` o `RECIBIDA` y su actualización de color (badge verde).
 5.  **Tolerancia a fallos (Circuit Breaker):**

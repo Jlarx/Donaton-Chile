@@ -38,6 +38,12 @@ export default function Necesidades() {
         }
     };
 
+    const cambiarEstado = (id, nuevoEstado) => {
+        api.put(`/necesidades/${id}/estado?estado=${nuevoEstado}`)
+           .then(cargarNecesidades)
+           .catch(err => alert('No se pudo cambiar el estado: ' + (err.response?.data?.message || err.message)));
+    };
+
     const getBadgeClass = (estado) => {
         if(estado === 'CUBIERTA') return 'badge-success';
         if(estado === 'PENDIENTE') return 'badge-warning';
@@ -53,6 +59,7 @@ export default function Necesidades() {
             error={error}
             registrarNecesidad={registrarNecesidad}
             eliminarNecesidad={eliminarNecesidad}
+            cambiarEstado={cambiarEstado}
             getBadgeClass={getBadgeClass}
         />
     );

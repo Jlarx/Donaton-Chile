@@ -48,4 +48,17 @@ public class NecesidadController {
         necesidadService.eliminarNecesidad(id);
         return ResponseEntity.noContent().build();
     }
+
+    // PUT /api/necesidades/{id}/estado
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<?> actualizarEstado(
+            @RequestHeader(value = "role", required = false) String role,
+            @PathVariable Long id,
+            @RequestParam("estado") String estado) {
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(java.util.Map.of("error", "Acceso denegado: Se requiere rol ADMIN"));
+        }
+        return ResponseEntity.ok(necesidadService.actualizarEstado(id, estado));
+    }
 }

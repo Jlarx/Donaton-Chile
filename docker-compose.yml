@@ -1,6 +1,31 @@
 version: '3.8'
 
 services:
+  # ============================================================
+  # Base de Datos PostgreSQL compartida (Database per Service)
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: donaton
+      POSTGRES_PASSWORD: donaton123
+      POSTGRES_DB: donaton
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    networks:
+      - donaton-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U donaton"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Eureka Server (Service Discovery)
+  # ============================================================
   eureka-server:
     build: ./EurekaServer
     ports:
@@ -8,6 +33,9 @@ services:
     networks:
       - donaton-network
 
+  # ============================================================
+  # Microservicio Usuarios
+  # ============================================================
   usuarios-service:
     build: ./Usuarios
     ports:
@@ -15,11 +43,22 @@ services:
     environment:
       - SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuarios_db
+      - SPRING_DATASOURCE_USERNAME=donaton
+      - SPRING_DATASOURCE_PASSWORD=donaton123
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - eureka-server
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - donaton-network
 
+  # ============================================================
+  # Microservicio Donaciones
+  # ============================================================
   donaciones-service:
     build: ./Donaciones
     ports:
@@ -27,11 +66,22 @@ services:
     environment:
       - SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/donaciones_db
+      - SPRING_DATASOURCE_USERNAME=donaton
+      - SPRING_DATASOURCE_PASSWORD=donaton123
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - eureka-server
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - donaton-network
 
+  # ============================================================
+  # Microservicio Logística
+  # ============================================================
   logistica-service:
     build: ./Logistica
     ports:
@@ -39,11 +89,22 @@ services:
     environment:
       - SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/logistica_db
+      - SPRING_DATASOURCE_USERNAME=donaton
+      - SPRING_DATASOURCE_PASSWORD=donaton123
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - eureka-server
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - donaton-network
 
+  # ============================================================
+  # Microservicio Necesidades
+  # ============================================================
   necesidades-service:
     build: ./Necesidades
     ports:
@@ -51,11 +112,22 @@ services:
     environment:
       - SPRING_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/necesidades_db
+      - SPRING_DATASOURCE_USERNAME=donaton
+      - SPRING_DATASOURCE_PASSWORD=donaton123
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - eureka-server
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - donaton-network
 
+  # ============================================================
+  # API Gateway Central (BFF)
+  # ============================================================
   central-gateway:
     build: ./Central
     ports:
@@ -68,6 +140,9 @@ services:
     networks:
       - donaton-network
 
+  # ============================================================
+  # Portal Frontend (React / Vite)
+  # ============================================================
   portal-frontend:
     build: ./Portal
     ports:
@@ -76,6 +151,9 @@ services:
       - central-gateway
     networks:
       - donaton-network
+
+volumes:
+  postgres-data:
 
 networks:
   donaton-network:

@@ -146,25 +146,11 @@ Para probar que el sistema de tolerancia a fallos funciona:
 
 Para correr el programa:
 
-cd .\productos\ 
+1. Ejecuta LANZAR.bat en la raíz del proyecto para iniciar los microservicios en ventanas independientes.
+2. Abre otra consola en la carpeta Portal (cd Portal) e inicia el servidor de desarrollo del Frontend:
+   npm run dev
 
-.\start-all.bat
- 
-Iniciando Proyecto Donaton (Microservicios y Frontend)...
-Levantando m├│dulo de Donaciones (Puerto 8081)...
-Levantando m├│dulo de Logistica (Puerto 8082)...
-Levantando m├│dulo Central/Gateway (Puerto 8080)...
-Levantando m├│dulo de Necesidades (Puerto 8083)...
-Levantando m├│dulo de Usuarios (Puerto 8084)...
-Levantando Portal de usuario (Puerto 5173)...
-┬íTodos los servicios han sido lanzados en ventanas separadas!
-Espere unos segundos a que inicialicen y luego abra http://localhost:5173 en su navegador.
-Presione una tecla para continuar . . . 
+Luego abre http://localhost:5173 en tu navegador.
 
-correr test
-
-..\mvnw.cmd clean test jacoco:report
-
-
-
-jose
+Para correr las pruebas unitarias y cobertura en el backend:
+.\mvnw.cmd clean test jacoco:report
